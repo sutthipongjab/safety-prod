@@ -1,0 +1,20 @@
+{
+  "short_name": "Workspace",
+  "name": "Workspace",
+  "icons": [
+    {
+      "src": "/itadmin/assets/images/icon_192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+	  "purpose": "any maskable"
+    }
+  ],
+  "start_url": ".",
+  "background_color": "#fff",
+  "display": "standalone",
+  "scope": ".",
+  "theme_color": "#fff",  
+  "description": "IS Workspace : Information for IS Workload",
+  "prefer_related_application" : true,
+  "orientation": "landscape"
+}

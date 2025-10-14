@@ -1,0 +1,12 @@
+.DS_Store
+.env
+/node_modules
+/system
+application/cache
+application/config/database.php
+application/logs
+application/vendor
+application/composer.lock
+package-lock.json
+assets/dist
+backup
