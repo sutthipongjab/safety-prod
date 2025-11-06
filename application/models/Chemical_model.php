@@ -128,10 +128,10 @@ class chemical_model extends Gpreport_model {
     }
 
     public function getSecRebuild($id, $sec){
+        $select = '';
+        $pivot  = '';
         if(!empty($sec)){
             // var_dump($section);
-            $select = '';
-            $pivot  = '';
             foreach($sec as $key => $value){
                 // $owner = substr($value->OWNER,0,-1);
                 $select .= "NVL(\"{$value}\", 'N') AS \"{$value}\",";
