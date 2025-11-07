@@ -7,8 +7,7 @@ import "datatables.net-responsive";
 import "datatables.net-responsive-dt";
 // import "datatables.net-dt/css/dataTables.dataTables.min.css";
 import "datatables.net-responsive-dt/css/responsive.dataTables.min.css";
-import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
+import { jsPDF } from "../lib/pdf.js";
 import html2canvas from 'html2canvas-pro';
 import {host, tableOption, showMessage, userInfoData ,ajaxOptions, getData , select2Option, domScroll, initJoin} from "../utils.js";
 import {writeExcelTemp, writeOpt, exportExcel, colToNumber, numberToCol} from '../_excel.js';
@@ -16,12 +15,13 @@ import {getfileInPath} from '../_file.js';
 import {createColumnFilters} from '../filter.js';
 import {createStamp, loadFont, optAutoTable} from '../_jsPDF.js';
 
-var sectionList, revisionList, table, freesiaUPC, userControl, ownerCode;
+var sectionList, revisionList, table, freesiaUPC, freesiaUPC_BOLD, userControl, ownerCode;
 var chmDetail = [];
 
 
 $(document).ready(async function () {
-    freesiaUPC = await loadFont(host, 'freesiaUPC/upcfl.ttf')
+    freesiaUPC = await loadFont(host, 'freesiaUPC/upcfl.ttf');
+    freesiaUPC_BOLD = await loadFont(host, 'freesiaUPC/upcfb.ttf');
     $('#owner').select2({...select2Option, placeholder: 'เลือกแผนก'});
 });
 
@@ -389,6 +389,8 @@ $(document).on('click', '#exportPDF',async function(){
 
         doc.addFileToVFS("upcfl.ttf", freesiaUPC);
         doc.addFont("upcfl.ttf", "freesiaUPC", "normal");
+        doc.addFileToVFS("upcfb.ttf", freesiaUPC_BOLD);
+        doc.addFont("upcfb.ttf", "freesiaUPC", "bold");
         doc.setFont("freesiaUPC");
         
         doc.setFontSize(20)

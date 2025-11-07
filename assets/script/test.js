@@ -1,10 +1,4 @@
 import $ from "jquery";
-// import "select2";
-// import "select2/dist/css/select2.min.css";
-// import 'datatables.net-dt';
-// import "datatables.net-dt/css/dataTables.dataTables.min.css";
-// import jsPDF from 'jspdf'
-// import autoTable from 'jspdf-autotable'
 
 import {host, showpreload, hidepreload, checkAuthen, tableOption, showMessage, userInfoData ,ajaxOptions, getData ,setDatePicker, dateFormat, select2Option, domScroll, initJoin, RequiredElement, requiredForm, removeClassError} from "./utils.js";
 // import {writeExcelTemp, writeOpt, exportExcel, colToNumber, numberToCol, fill, border, alignment} from '../_excel.js';

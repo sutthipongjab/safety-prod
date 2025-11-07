@@ -1,10 +1,6 @@
 import $ from "jquery";
 import "select2";
 import "select2/dist/css/select2.min.css";
-// import 'datatables.net-dt';
-// import "datatables.net-dt/css/dataTables.dataTables.min.css";
-// import jsPDF from 'jspdf'
-// import autoTable from 'jspdf-autotable'
 
 import {host, showMessage, userInfoData ,ajaxOptions, getData , select2Option, requiredForm, resetForm, formRemoveError, sendmail, sendMail, mailOpt} from "../utils.js";
 // import {writeExcelTemp, writeOpt, exportExcel, colToNumber, numberToCol, fill, border, alignment} from '../_excel.js';

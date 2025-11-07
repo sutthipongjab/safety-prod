@@ -3,15 +3,14 @@ import "select2";
 import "select2/dist/css/select2.min.css";
 import 'datatables.net-dt';
 import "datatables.net-dt/css/dataTables.dataTables.min.css";
-import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
+import { jsPDF } from "../lib/pdf.js";
 import {host, showpreload, hidepreload, checkAuthen, tableOption, showMessage, userInfoData ,ajaxOptions, getData ,setDatePicker, dateFormat, select2Option, domScroll, initJoin, RequiredElement, requiredForm, removeClassError} from "../utils.js";
 import {writeExcelTemp, writeOpt, exportExcel, colToNumber, numberToCol, fill, border, alignment} from '../_excel.js';
 import {getfileInPath, getArrayBufferFile} from '../_file.js';
 import {createColumnFilters} from '../filter.js';
 import {createStamp, loadFont, optAutoTable} from '../_jsPDF.js';
 
-var sectionList, revisionList, table, table_re, table_reSec, table_submit, rebuildID ,uniqueSec, freesiaUPC, userControl;
+var sectionList, revisionList, table, table_re, table_reSec, table_submit, rebuildID ,uniqueSec, freesiaUPC, freesiaUPC_BOLD, userControl;
 
 const columnRebuild = [
     {
@@ -51,7 +50,8 @@ const columnRebuildSec = [
 
 
 $(document).ready(async function () {
-    freesiaUPC = await loadFont(host, 'freesiaUPC/upcfl.ttf')
+    freesiaUPC = await loadFont(host, 'freesiaUPC/upcfl.ttf');
+    freesiaUPC_BOLD = await loadFont(host, 'freesiaUPC/upcfb.ttf');
     await getMaster();
 });
 
@@ -1010,7 +1010,10 @@ $(document).on('click', '#exportPDF',async function(){
 
         doc.addFileToVFS("upcfl.ttf", freesiaUPC);
         doc.addFont("upcfl.ttf", "freesiaUPC", "normal");
+        doc.addFileToVFS("upcfb.ttf", freesiaUPC_BOLD);
+        doc.addFont("upcfb.ttf", "freesiaUPC", "bold");
         doc.setFont("freesiaUPC");
+
         
         doc.setFontSize(20)
         doc.text(`LIST OF SDS_CHEMICAL USER OR HANDLING in ${currentYear}`, 6, 10)

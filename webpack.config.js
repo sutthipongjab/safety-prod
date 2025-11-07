@@ -69,6 +69,7 @@ module.exports = {
             "@indexDB": path.resolve(__dirname, "../form/assets/script/indexDB"),
             "@styles": path.resolve(__dirname, "../form/assets/dist/css"),
             "@api": path.resolve(__dirname, "../form/assets/script/api"),
+            '@root': path.resolve(__dirname, '../form/assets/script'),
         },
     },
     module: {
@@ -95,6 +96,7 @@ module.exports = {
                 exclude: /public/, // <<< อย่ามาย่อไฟล์ที่ copy มา
             }),
         ],
+        // sideEffects: true,
     },
     plugins: [
         new Dotenv({
