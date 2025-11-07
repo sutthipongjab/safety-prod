@@ -10,3 +10,4 @@ application/composer.lock
 package-lock.json
 assets/dist
 backup
+assets/script/public

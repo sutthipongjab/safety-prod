@@ -16,7 +16,7 @@
     <link rel="apple-touch-startup-image" href="{{ base_url() }}assets/images/safety_icon.png">
     <meta name="app_version" content="{{ $GLOBALS['version'] }}">
     {{-- <link rel="stylesheet" href="{{ $GLOBALS['cdn'] }}icofont/icofont.min.css"> --}}
-    <link rel="stylesheet" href="{{ $GLOBALS['cdn'] }}icofont/2025.01.30/icofont.min.css">
+    <link rel="stylesheet" href="{{ $_ENV['APP_CDN'] }}/icofont/2025.01.30/icofont.min.css">
     <link rel="stylesheet" href="{{ $GLOBALS['style'] }}tailwind.css?ver={{ date('Ymdhis') }}">
     <title>AMEC Safety</title>
     @yield('styles')

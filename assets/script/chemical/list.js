@@ -51,15 +51,9 @@ const columnRebuildSec = [
 
 
 $(document).ready(async function () {
-    // console.log(userInfoData);
     freesiaUPC = await loadFont(host, 'freesiaUPC/upcfl.ttf')
-    
     await getMaster();
-    // createColumnFilters(table, '1-9')
-    
 });
-
-
 
 async function getMaster(){
     const ajaxOpt = { ...ajaxOptions };
@@ -79,7 +73,6 @@ async function getMaster(){
             
         }, 5000);
     }
-    // console.log(data);
 }
 
 
@@ -89,15 +82,12 @@ async function getMaster(){
 var flagSelect = false;
 $(document).on('change', 'select.req', async function(){
     const select = $(this);
-    
     if (flagSelect) {
         // หาก trigger มาจากโปรแกรม ไม่ต้องทำอะไร
         flagSelect = false;
         return;
     }
-    // console.log(select);
     RequiredElement(select);
-
 });
 
 /**
@@ -114,10 +104,8 @@ $(document).on("click", "#add-chemical", async function (e) {
  * Edit chemical
  */
 $(document).on("click", ".edit-chemical", async function (e) {
-    // flag = false;
     $('#headeritem').text('แก้ไขข้อมูลสารเคมี');
     const data = table.row($(this).parents("tr")).data();
-    console.log(data);
 
     const frm = $("#chemical-master");
     for (const [key, value] of Object.entries(data)) {
@@ -126,7 +114,14 @@ $(document).on("click", ".edit-chemical", async function (e) {
         if (target.is("select")) {
             target.val(value).trigger("change");
         } else if (['RECEIVED_SDS_DATE','EFFECTIVE_DATE'].includes(key)){
-            target.val(value).siblings('input').val(value);
+            // target.val(value).siblings('input').val(value);
+            setDatePicker({
+                altInput: true,
+                altFormat: 'd-M-y',
+                dateFormat: 'd/m/Y',
+                defaultDate: value,
+            },`#${key}`);
+            // target[0]._flatpickr.setDate(value, true);
         }else {
             target.val(value);
         }
@@ -134,7 +129,6 @@ $(document).on("click", ".edit-chemical", async function (e) {
 });
 
 $(document).on('click', '#save', async function(){
-
     const rs   = $('#RECEIVED_SDS_DATE');
     const ef   = $('#EFFECTIVE_DATE');
     const pro  = $('#PRODUCT_CODE');
@@ -143,7 +137,6 @@ $(document).on('click', '#save', async function(){
     const name = $('#CHEMICAL_NAME');
     const cla  = $('#UN_CLASS');
     const rev  = $('#REV');
-
     const fields = [
         { element: rs,   message: 'กรุณาเลือกวันที่ RECEIVED SDS DATE' },
         { element: ef,   message: 'กรุณาเลือกวันที่ EFFECTIVE DATE' },
@@ -161,35 +154,20 @@ $(document).on('click', '#save', async function(){
     btn.addClass("loaded");
     btn.find(".loading").removeClass("hidden");
     var formData = new FormData(frm[0]);
-    // const typeStatus = $('#TYPE_STATUS').is(':checked') ? 1 : 0; // เก็บค่า 1 หรือ 0
-    // formData.set('TYPE_STATUS', typeStatus);
-    // const typeMaster = $('#TYPE_MASTER').val(); // เก็บค่า 1 หรือ 0
-    // formData.set('TYPE_MASTER', typeMaster);
     formData.set('USER_UPDATE', userInfoData.sempno);
-
-    // // //ตรวจสอบข้อมูล
-    for (var pair of formData.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
-    }
-
     const ajax = {...ajaxOptions};
     ajax.url   = `${host}Chemical/chemicalList/save`;
     ajax.data  = formData;
     ajax.processData = false;
     ajax.contentType = false;
     await getData(ajax).then(async (res) => {  
-        console.log('save',res);
         if(res.status == true){
-            // console.log(1);
-            
             await setTable(res.data, res.sec);
             showMessage('บันทึกข้อมูลสำเร็จ','success');
         }else{
-            // console.log(2);
             showMessage('บันทึกข้อมูลไม่สำเร็จ กรุณาลองใหม่ภายหลัง','error');
         }
     });
-
     btn.removeClass("loaded");
     btn.find(".loading").addClass("hidden");
     $("#drawer-master").prop("checked", false);
@@ -200,9 +178,7 @@ $(document).on('click', '#save', async function(){
  */
 $(document).on('click', '.confirm', function(){
     const data = table.row($(this).parents("tr")).data();
-    console.log(data);
     const id   = data.AMEC_SDS_ID;
-    console.log(data.AMEC_SDS_ID);
     $('#del').attr('d-id',id);
 });
 
@@ -211,8 +187,6 @@ $(document).on('click', '.confirm', function(){
  */
 $(document).on('click', '.del', async function(){
     const id = $(this).attr('d-id');
-    console.log(id);
-
     const ajax = {...ajaxOptions};
     ajax.url = `${host}Chemical/chemicalList/del`;
     ajax.data = {id:id};
@@ -268,25 +242,9 @@ $(document).on('click', '#re-chemical', async function(){
  * Select rows all
  */
 $(document).on("click", "#select-all", function (e) {
-    // const chk = $(this).is(":checked");
-    // table_re.rows({ search: "none" }).every(function () {
-    //     $(this.node()).find(".chk").prop("checked", chk);
-    //     chk ? $(this.node()).addClass("selected") : $(this.node()).removeClass("selected");
-    // });
-
-    // table_re.rows({ search: "applied" }).data().each(function (value, index) {
-    //     console.log("Row data:", value);
-    // });
-
-    // table_re.rows({ search: "applied" }).every(function () {
-    //     const $row = $(this.node());
-    //     console.log($row); // ตรวจสอบว่าเข้าถึง DOM ได้หรือไม่
-    // });
-
     const check = $(this).is(":checked");
     table_re.rows({ search: "applied" }).every(function () {
       const data = this.data();
-      console.log(data, data.selected);
       
       if (check) {
         data.selected = true;
@@ -303,17 +261,12 @@ $(document).on("click", "#select-all", function (e) {
     }
 });
 
-// /**
-//  * Select row
-//  */
+/**
+* Select row
+*/
 $(document).on("click", ".select-row", function (e) {
-    // table_re.rows().every(function () {
-        //         $(this.node()).find(".chk").prop("checked") ? $(this.node()).addClass("selected") : $(this.node()).removeClass("selected");
-        //     });
     let data = table_re.row($(this).parents("tr")).data();
     const check = $(this);
-    console.log(check);
-    
     if (check.is(":checked")) {
       data = { ...data, selected: true };
     } else {
@@ -324,18 +277,13 @@ $(document).on("click", ".select-row", function (e) {
 
 $(document).on("click", ".sec-active", function () {
     let data = table_reSec.row($(this).parents("tr")).data();
-    console.log(data);
-    
     const check = $(this);
-    console.log(check, check.is(":checked"));
-    
     if (check.is(":checked")) {
-      data = { ...data, selected: true };
+        data = { ...data, selected: true };
     } else {
         delete data.selected;
     }
     table_reSec.row($(this).parents("tr")).data(data);
-    
 });
 
 /**
@@ -345,7 +293,6 @@ $(document).on('click', '#previous', function(e){
     e.preventDefault();
     const step = parseInt($(this).attr('step'));
     if(step == 2){
-        // $('#next').attr('step',1).removeClass('hidden').html('ถัดไป');
         $('#next').attr('step',1).removeClass('hidden');
         $(this).attr('step',1).addClass('hidden');
 
@@ -377,10 +324,10 @@ $(document).on('click', '#previous', function(e){
         $('.step-h-3').removeClass('step-primary');
     }
 });
+
 $(document).on('click', '#next', async function(e){
     e.preventDefault();
     const step = parseInt($(this).attr('step'));
-    
     if(step == 1){
         const data = table_re.rows().data().toArray();
         const selected = data.filter((el) => el.selected === true);
@@ -388,16 +335,12 @@ $(document).on('click', '#next', async function(e){
           showMessage("กรุณาเลือกสารเคมีที่ต้องการเปิดการใช้งานอีกครั้ง", 'error', 'toast-start');
           return ;
         }
-
         $('#previous').attr('step',2).removeClass('hidden');    
         $(this).attr('step',2);
-        // $(this).attr('step',2).html('ยืนยัน');
         $('.step-active').addClass('hidden').removeClass('step-active');
         $('.step-2').addClass('step-active').removeClass('hidden'); 
         $('.step-h-2').addClass('step-primary');
       
-        console.log(selected);
-        
         rebuildID = selected.map( (el) => {
             return el.AMEC_SDS_ID;
         });
@@ -407,29 +350,11 @@ $(document).on('click', '#next', async function(e){
         });
         uniqueSec = [...new Set(sec.flat())];
 
-        console.log(rebuildID,sec,uniqueSec);
-
         const ajax = {...ajaxOptions};
         ajax.url = `${host}Chemical/chemicalList/getSecRebuild`;
         ajax.data = {id:JSON.stringify(rebuildID), sec:JSON.stringify(uniqueSec)};
         await getData(ajax).then(async (d) => {
-            // console.log(d);
-            // columnRebuildSec = [
-            //     { data: "AMEC_SDS_ID", title: "ID"},
-            //     { data: "CHEMICAL_NAME", title: "ชื่อสารเคมี", visible: false},
-            //     { data: "PRODUCT_CODE", title: "รหัสสารเคมี"},
-            //     { data: "REV", title: "REV"},
-            //     { data: "EFFECTIVE_DATE", title: "EFFECTIVE DATE"},
-            //     { data: "RECEIVED_SDS_DATE", title: "RECEIVED SDS DATE"},
-            //     { data: "USED_FOR", title: "การใช้ประโยชน์"},
-            //     { data: "USED_AREA", title: "จุดใช้งาน"},
-            //     { data: "KEEPING_POINT", title: "จุดจัดเก็บ"},
-            //     { data: "QTY", title: "จำนวน"},
-            //     { data: "CLASS", title: "CLASS"},
-                
-            // ];
             const colSec = uniqueSec.map((s) =>{
-                // console.log(s); 
                 return {
                     data:s, 
                     title:s, 
@@ -437,8 +362,6 @@ $(document).on('click', '#next', async function(e){
                     render: function(data, type, row, meta){
                         const disable = data == 'N' ? 'disabled' : '';
                         return `<input type="checkbox" class=" checkbox sec-active" ${disable} ${row.selected != undefined && data == 'Y' ? "checked" : ""}/>`;
-                        // return data == 'Y' ? `<input type="checkbox" class=" checkbox sec-active" ${disable} ${row.selected != undefined ? "checked" : ""}/>`: '';
-                        // return `<input type="checkbox" class="chk checkbox sec-active" value="${row.AMEC_SDS_ID}|${s}" ${disable} />`;
                     },
                     orderable: false
                 }
@@ -449,15 +372,10 @@ $(document).on('click', '#next', async function(e){
             $('.text-remark').removeClass('hidden');
             
         });
-        
-        // $("#create-users").prop("checked", false);
-        // window.location.reload();
     }else if(step == 2){
         $('#previous').attr('step',3);
         $(this).attr('step',3).html('ยืนยัน')
         $('.text-remark').addClass('hidden');
-        // $(this).attr('step',3).addClass('hidden');
-
         $('.step-active').addClass('hidden').removeClass('step-active');
         $('.step-3').addClass('step-active').removeClass('hidden'); 
         $('.step-h-3').addClass('step-primary');
@@ -477,20 +395,9 @@ $(document).on('click', '#next', async function(e){
                         return key;
                     });
             });
-            // console.log(mapD);
-            
             table_submit = await createTable('#table_submit', selectedMaster, columnRebuild.slice(1), '50vh');
             createColumnFilters(table_submit, '1-8');
         }else{
-            // const mapData = selectedSec.map((el) => {
-            //     return {
-            //         ...el,
-            //         ...Object.fromEntries(
-            //             uniqueSec.map((sec) => [sec, el[sec] === 'Y' ? 'Y' : ''])
-            //         ),
-            //     };
-            // });
-
             const mapD = selectedMaster.map((el) => {
                 return {
                     ...el,
@@ -501,11 +408,7 @@ $(document).on('click', '#next', async function(e){
                     ),
                 };
             });
-            console.log(mapD);
-            
-            console.log('check', selectedSec, selectedMaster, columnRebuildSec, uniqueSec);
-            const colSec = uniqueSec.map((s) =>{
-                // console.log(s); 
+            const colSec = uniqueSec.map((s) =>{ 
                 return {
                     data:s, 
                     title:s, 
@@ -523,26 +426,16 @@ $(document).on('click', '#next', async function(e){
             })
             
             table_submit = await createTable('#table_submit', mapD, [...columnRebuild.slice(1), ...colSec], '50vh');
-            // console.log(table_submit);
             createColumnFilters(table_submit, '1-7');
-
-            // table_submit = await createTable('#table_submit', selectedSec, [...columnRebuildSec, ...colSec], '50vh');
         }
 
         $('.step-3-skeleton').addClass('hidden');
-        console.log(rebuildID);
-        
     }else if(step == 3){
-        console.log(table_submit);
-        
         const data = table_submit.rows().data().toArray();
-        console.log(data);
-        
         const ajax = {...ajaxOptions};
         ajax.url = `${host}Chemical/chemicalList/statusOn`;
         ajax.data = {data:JSON.stringify(data),sec:JSON.stringify(uniqueSec)};
         await getData(ajax).then(async (res) => {
-            
             if(res.status == true){
                 showMessage('บันทึกข้อมูลสำเร็จ','success');
                 $('#cancleModal').trigger('click');
@@ -592,7 +485,6 @@ $(document).on('click', '#cancleModal', function(){
 
     // close modal
     $('#modal_rebuild').prop('checked', false);
-    // console.log(table_re);
 });
 
 
@@ -601,7 +493,6 @@ $(document).on('click', '#cancleRev', function(){
 });
 
 $(document).on('click', '#modal_rev', function(){
-    console.log('modal_rev');
     $('#current-revision').val(revisionList.MASTER).focus();
 });
 
@@ -620,7 +511,6 @@ $(document).on('click', '#saveRev', async function(){
             showMessage('บันทึกข้อมูลสำเร็จ','success');
             $('.revision-master').html(`Rev. No. ${rev.toUpperCase()}`);
             $('#cancleRev').trigger('click');
-            // getMaster();
         }else if(res.status == 3){
             showMessage('กรุณากรอก Revision ใหม่','warning');
 
@@ -639,14 +529,8 @@ $(document).on('click', '#saveRev', async function(){
  * @param {object} sec 
  */
 async function setTable(data, sec){
-    // console.log(data);
-    // console.log(Object.entries(data), Object.values(data), Object.keys(data));
-    // console.log('setTable',data, sec);
-    
     let html = '';
     if(userInfoData.group_code == 'DEV' || userInfoData.group_code == 'ADM'){
-    // if(userInfoData.group_code == 'ADM'){
-        // console.log(1);
         const revHtml = $('.revision-master').length == 0 ?`<div class="font-bold flex items-center gap-5">
             <span class="revision-master">Rev. No. ${revisionList.MASTER} </span>
             <label for="modal_rev" class="drawer-button btn btn-xs  btn-neutral flex items-center tooltip tooltip-left" data-tip="แก้ไข Revision" id="rev-control">
@@ -662,7 +546,6 @@ async function setTable(data, sec){
         </div>`;
         $('.card-body').append(html);
         for (const [key, value] of Object.entries(data)) {
-            // console.log(key, value);
             if(key == 'Master'){
                 const columns = [
                     { 
@@ -695,8 +578,20 @@ async function setTable(data, sec){
                         width: "105px",
     
                     }, 
-                    {data:'RECEIVED_SDS_DATE', title:'RECEIVED SDS DATE'}, 
-                    {data:'EFFECTIVE_DATE',    title:'EFFECTIVE DATE'}, 
+                    {
+                        data:'RECEIVED_SDS_DATE', 
+                        title:'RECEIVED SDS DATE', 
+                        // render: function(data, type, row, meta){
+                        //     return data ? formatDate(data, 'DD-MMM-YY', 'DD/MM/YYYY') : '-';
+                        // }
+                    }, 
+                    {
+                        data:'EFFECTIVE_DATE',    
+                        title:'EFFECTIVE DATE', 
+                        // render: function(data, type, row, meta){
+                        //     return data ? formatDate(data, 'DD-MMM-YY', 'DD/MM/YYYY') : '-';
+                        // }
+                    }, 
                     {
                         data:'PRODUCT_CODE',      
                         title:'Product Code / Item No.',
@@ -716,7 +611,6 @@ async function setTable(data, sec){
                     
                 ];
                 const colSec = sec.map((s) =>{
-                    // console.log(s); 
                     return {
                         data:s.OWNER.slice(0,-1), 
                         title:s.OWNER, 
@@ -730,29 +624,25 @@ async function setTable(data, sec){
                                 <i class="icofont-check text-green-500 text-[1.25rem] border-2 rounded-full border-black"></i>
                             </div>
                             `;
-                            // const dNew = data == 'N' ? '' : data;
                             return `<div class="text-center">${dNew}</div>`;
                         },
                         orderable: false
                     }
                 })
-                // console.log( [...columns, ...colSec]);
                 
                 table = await createTable('#table_master', value, [...columns, ...colSec]);
                 createColumnFilters(table, '1-9');
-                // setDatePicker();
-                setDatePicker({
-                    altInput: true,
-                    altFormat: 'd-M-y',
-                    dateFormat: 'd/m/Y',
-                });
+                // setDatePicker({
+                //     altInput: true,
+                //     altFormat: 'd-M-y',
+                //     dateFormat: 'd/m/Y',
+                // });
                 const s2opt = { ...select2Option };
                 s2opt.placeholder = 'เลือก class';
                 $('#UN_CLASS').select2(s2opt);
             }
         }
     }else{
-        // console.log(2);
         const columns = [
             {data:'AMEC_SDS_ID',        title: 'ID'}, 
             {data:'CHEMICAL_NAME',      title: 'ชื่อสารเคมี'}, 
@@ -795,12 +685,9 @@ async function setTable(data, sec){
         ];
         html =`<div role="tablist" class="tabs tabs-lifted w-full grid-cols-[0fr]">`;
         for (const [key, value] of Object.entries(data)) {
-            console.log(data);
-            
             const index = Object.keys(data).indexOf(key);
             const check = index == 0 ? 'checked' : ''; 
             const org = key.slice(0, -1).replace(/\s+/g, '_');
-            console.log(org);
             
             html += `<input type="radio" name="my_tabs_2" role="tab" class="tab whitespace-nowrap" aria-label="${key}" ${check} />
                     <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-6">
@@ -816,8 +703,6 @@ async function setTable(data, sec){
         $('.card-body').append(html);
         Object.entries(data).forEach(async ([key, value], index) => {
             const org = key.slice(0, -1).replace(/\s+/g, '_');
-            console.log(org);
-            
             table = await createTable(`#${org}`, value, columns);
             createColumnFilters(table, '0-11');
         });
@@ -833,24 +718,13 @@ async function setTable(data, sec){
  * @returns 
  */
 async function createTable(tableID, data, columns, maxH = '60vh'){
-    console.log('create table',tableID, data, columns);
-    
     const opt = { ...tableOption };
-    // opt.autoWidth = true;
-    // opt.ordering     = false;
-    // opt.searching    = false;
-    // opt.lengthChange = false;
-    // opt.pageLength = 15,
     opt.lengthMenu = [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'All']]
     opt.order = [[0, 'asc']];
     opt.data = data;
     opt.dom  = domScroll.replace('max-h-[60vh]', `max-h-[${maxH}]`);
-    // opt.dom= '<"top flex flex-wrap gap-3 mb-2"<"flex-1 join "lf><"table-option join items-center">><"overflow-scroll max-h-[60vh]"rt><"bottom flex justify-between mt-5"pi>'
-    // opt.dom= '<"top flex justify-between mb-2"<"join "<"join-item border"l><"join-item border"f>><"table-option flex items-center">><"overflow-scroll max-h-[60vh]"rt><"bottom flex justify-between mt-5"pi><"clear">'
-    opt.columns = columns
-    // console.log(tableID,opt);
+    opt.columns = columns;
     opt.initComplete = function () {
-        // console.log($(tableID+'_wrapper').parent().html())
         const addChe = tableID == '#table_master' ? 
             `<label for="drawer-master" class="drawer-button btn btn-sm join-item btn-primary flex items-center tooltip tooltip-left " data-tip="เพิ่มสารเคมี" id="add-chemical">
                 
@@ -860,11 +734,6 @@ async function createTable(tableID, data, columns, maxH = '60vh'){
                 <i class="icofont-duotone icofont-rebuild text-xl"></i>
             </label> 
             ` :'';
-            // <label for="" class="drawer-button btn btn-sm join-item btn-primary " id="re-chemical" onclick="modal_rebuild.showModal()">
-            //     เปิดใช้งานสารเคมีเก่า
-            // </label>
-            console.log(tableID);
-            
         if(tableID != '#table_rebuild' && tableID != '#table_rebuild_sec' && tableID != '#table_submit'){
             
             $(`${tableID}_wrapper .table-option`).append(`
@@ -875,43 +744,9 @@ async function createTable(tableID, data, columns, maxH = '60vh'){
                     <i class="icofont-file-pdf text-xl" ></i>
                 </label>
                 ${addChe}`);
-            // $(`${tableID}_wrapper .table-option`).append(`
-            //     <label for="" class="btn btn-sm join-item btn-primary rounded-full max-w-xs" id="exportExcel" tableID="${tableID}">
-            //         Export
-            //     </label>
-            //     <label for="drawer-item" class="drawer-button btn btn-sm join-item btn-primary rounded-full" id="add-chemical">
-            //         เพิ่มสารเคมี
-            //     </label>`);
-            // $(tableID).find('thead').addClass('sticky top-0 bg-white z-10');
-            // $(".dt-length").find('select').addClass("join-item");
-            // $(".dt-search").find('input').addClass("join-item");
         }
         initJoin(tableID);
-        // this.api().columns()
-        // this.api()
-        //   .columns()
-        //   .every(function () {
-        //     const column = this;
-        //     const header = $(column.header());
-        //     const select = $('<select class="hidden"><option value="">All</option></select>')
-        //       .appendTo(header)
-        //       .on('change', function () {
-        //         const val = $.fn.dataTable.util.escapeRegex($(this).val());
-        //         column.search(val ? `^${val}$` : '', true, false).draw();
-        //       });
-
-        //     // Add unique values to the dropdown
-        //     column
-        //       .data()
-        //       .unique()
-        //       .sort()
-        //       .each(function (d) {
-        //         select.append(`<option value="${d}">${d}</option>`);
-        //       });
-        //   });
     };
-    // if(tableID.includes('#table_rebuild_sec','#table_submit')){
-    // if(tableID == '#table_rebuild_sec' || tableID == '#table_submit' && columns.every(col => col.data !== 'VENDOR')){
     if(tableID == '#table_rebuild_sec'){
         opt.drawCallback = function (settings) {
             var api = this.api();
@@ -920,13 +755,6 @@ async function createTable(tableID, data, columns, maxH = '60vh'){
 
             // ลบกลุ่มที่มีอยู่เดิม
             $(rows).removeClass('group-row');
-
-            // console.log(columns, columns.length);
-            // if (columns.every(col => col.data !== 'VENDOR')) {
-            //     console.log('Data does not have key VENDOR');
-            // } else {
-            //     console.log('Data has key VENDOR', api.columns());
-            // }
             
             // วนลูปเพื่อสร้างกลุ่ม
             api.column(1, { page: 'current' }).data().each(function (group, i) {
@@ -959,17 +787,8 @@ async function createTable(tableID, data, columns, maxH = '60vh'){
  * Group chemical name in table rebuild section
  */
 $(document).on('click', 'tr.group-row', function () {
-    // if($('#next').attr('step' == 3)){
-    //     const t = table_submit;
-    // }else{
-    //     const t = table_reSec;
-    // }
     var group = $(this).data('group'); // รับค่าหมวดหมู่
-    console.log(group); 
-
     var rows = table_reSec.rows({ page: 'current' }).data(); // ดึงข้อมูลปัจจุบันทั้งหมด
-    console.log(rows);
-
     var $icon = $(this).find('i'); // หาไอคอนใน row นี้
 
     // Toggle ไอคอน
@@ -981,8 +800,6 @@ $(document).on('click', 'tr.group-row', function () {
 
     table_reSec.rows({ page: 'current' }).every(function () {
         var rowData = this.data(); // ดึงข้อมูลแถวปัจจุบัน
-        console.log(rowData);
-        
         if (rowData['CHEMICAL_NAME'] === group) { // ตรวจสอบค่า Category
             var rowNode = this.node(); // ดึง DOM node ของแถว
             $(rowNode).toggle('-translate-y-6'); // ซ่อนหรือแสดงแถว
@@ -1002,8 +819,6 @@ $(document).on('click', '#exportExcel',async function(){
             delete item.STATUS;
             return item;
         });
-        let columns = [];
-        // const opt = {...writeOpt};
         if(tableID == '#table_master'){
             exportMaster(data);
         }else{
@@ -1019,10 +834,7 @@ $(document).on('click', '#exportExcel',async function(){
  * @param {object} data 
  */
 async function exportMaster(data){
-    // console.log(data);
-    
     const template = await getfileInPath('assets/file/Template','Chemical list.xlsx')
-    console.log('template',template);
     if(template.length > 0){
         const file = template[0].buffer;
         const opt = {...writeOpt};
@@ -1081,7 +893,6 @@ async function exportMaster(data){
             });
         };
         const wb = await writeExcelTemp(file.buffer,opt);
-        console.log('wb',wb);
         exportExcel(wb,'Chemical list');
     }else{
         showMessage('ไม่พบไฟล์ Template ติดต่อ admin 2038');
@@ -1095,9 +906,7 @@ async function exportMaster(data){
  * @param {string} fileName e.g. QC1 SEC
  */
 async function exportMasterSec(data, fileName){
-    console.log(data);
     const template = await getfileInPath('assets/file/Template','Chemical list section.xlsx')
-    console.log('template',template);
     if(template.length > 0){
         const file = template[0].buffer;
         const opt = {...writeOpt};
@@ -1117,8 +926,6 @@ async function exportMasterSec(data, fileName){
                 from: `A${opt.startRow-1}`, 
                 to:   `${numberToCol(Object.keys(data[0]).length+1)}${opt.startRow-1}`, 
             };
-            
-            console.log(data.length);
             
             sheet.getCell(opt.startRow+1, colToNumber('J')).value = { formula: `=SUM(J${opt.startRow}:J${opt.startRow+data.length-1})` }; 
 
@@ -1147,9 +954,6 @@ async function exportMasterSec(data, fileName){
             const userCon = userControl[`${fileName}.`] || '';
             if(userCon != ''){
                 if(userCon.includes('|')){
-                    console.log(rowIndex,userCon.split('|').length+1);
-                    
-                    // await sheet.duplicateRow(rowIndex, userCon.split('|').length+1, true);
                     sheet.insertRow(rowIndex, []);
                     sheet.getCell(rowIndex, 3).value = 'CONTROLLER'; 
                     rowIndex++;
@@ -1169,26 +973,7 @@ async function exportMasterSec(data, fileName){
             }
         };
         const wb = await writeExcelTemp(file.buffer,opt);
-        console.log('wb',wb);
-        exportExcel(wb, `Chemical list ${fileName}`)
-        // const columns = [
-        //     {key:'AMEC_SDS_ID',        header: 'AMEC SDS ID'}, 
-        //     {key:'CHEMICAL_NAME',      header: 'Chemical Name'}, 
-        //     {key:'REV',                header: 'Revision'},
-        //     {key:'EFFECTIVE_DATE',     header: 'Effective Date'}, 
-        //     {key:'RECEIVED_SDS_DATE',  header: 'Received SDS Date'}, 
-        //     {key:'USED_FOR',           header: 'Used For', className: "min-w-[250px]"}, 
-        //     {key:'USED_AREA',          header: 'Used Area'},
-        //     {key:'KEEPING_POINT',      header: 'Keeping Point'},
-        //     {key:'QTY',                header: 'Quantity'},
-        //     {key:'REC4052',            header: 'REC4052'},
-        //     {key:'REC4054',            header: 'REC4054'},
-        //     {key:'CLASS',              header: 'Class'},
-        // ];
-        // const opt = {...excelOptions};
-        // opt.sheetName = 'TH ตัด';
-        // const workbook = defaultExcel(data, columns, opt);
-        // exportExcel(workbook, fileName){;
+        exportExcel(wb, `Chemical list ${fileName}`);
     }else{
         showMessage('ไม่พบไฟล์ Template ติดต่อ admin 2038');
     }
@@ -1205,13 +990,11 @@ $(document).on('click', '#exportPDF',async function(){
     ajax.url = `${host}Chemical/chemicalList/getDataForPDF`;
     ajax.data = {owner: $(this).attr('tableID').replace('#','').replace('_',' ')};
     await getData(ajax).then(async (res) => {
-        console.log(res);
         const currentYear = new Date().getFullYear();
         const currentSMon = new Date().toLocaleString('default', { month: 'short' });
         const currentDay  = new Date().getDate();
         let fileName = `List of chemical Rev`;
 
-        // const freesiaUPC = await loadFont(host, 'freesiaUPC/upcfl.ttf')
         const x = 282.5;
         const y = 20;
         const headerHeight = 18;
@@ -1236,39 +1019,11 @@ $(document).on('click', '#exportPDF',async function(){
         doc.rect(5, 6, 120, 6);
         doc.rect(273, 6, 19, 22);
         doc.rect(273, 6, 19, 5);
-
-        // // กำหนดสีสำหรับตราประทับ
-        // doc.setDrawColor(255, 0, 0); // สีแดงสำหรับเส้น
-        // doc.setLineWidth(0.5);
-
-        // // วาดวงกลม (ตำแหน่ง x, y, รัศมี)
-        // doc.circle(x, y, 9, 'S'); // 'S' หมายถึงลักษณะการวาดเป็นเส้น
-        // // วาดเส้นแนวนอน (ตำแหน่ง x1, y1, x2, y2)
-        // doc.line(x-8.5, y-2, x+8.5, y-2); // เส้นด้านบน
-        // doc.line(x-8.5, y+3, x+8.5, y+3); // เส้นด้านล่าง
-        
-        // // ใส่ข้อความในแต่ละช่อง
-        // doc.setFontSize(14);
-        // doc.text(`S/T ${res.manager[0].SPOSNAME}`, x, 10, {align : 'center'});
-        // doc.setTextColor(255, 0, 0); // สีแดงสำหรับข้อความ
-        // doc.setFontSize(18);
-        // doc.text('AMEC', x, y-3, { align: 'center' }); // ข้อความด้านบน
-        // doc.setFontSize(10);
-        // doc.text(`${currentDay} ${currentSMon} ${currentYear}`, x, y+1.5, { align: 'center' }); // ข้อความตรงกลาง
-        // doc.setFontSize(14);
-        // doc.setCharSpace(-0.3);
-        // doc.text(res.manager[0].SNAME.split(' ')[0], x, y+7, { align: 'center' }); // ข้อความด้านล่าง
-        // doc.setCharSpace(0);
-        // doc.setTextColor(0, 0, 0);
-        
-
-            
         if(userInfoData.group_code == 'DEV' || userInfoData.group_code == 'ADM'){
             const data = JSON.parse(JSON.stringify(table.rows().data().toArray()));
             data.forEach((item, index) => {
                 item.No = index + 1;
             });
-            // console.log(data);
             
             const columnsData = [
                 { header: 'No.',                      dataKey: 'No' },
@@ -1307,9 +1062,7 @@ $(document).on('click', '#exportPDF',async function(){
                 }
             });
             
-            createStamp(doc, x, y, res.manager[0].SPOSNAME, `${currentDay} ${currentSMon} ${currentYear}`, res.manager[0].SNAME.split(' ')[0])
-            console.log(optAutoTable);
-            
+            createStamp(doc, x, y, res.manager[0].SPOSNAME, `${currentDay} ${currentSMon} ${currentYear}`, res.manager[0].SNAME.split(' ')[0]);
             const opt = {...optAutoTable};
             opt.headStyles.minCellHeight = headerHeight,
             opt.headStyles.overflow = 'hidden',
@@ -1366,112 +1119,7 @@ $(document).on('click', '#exportPDF',async function(){
                 doc.text(`REV. NO. ${revisionList.MASTER}`, 5, 5);
             }
             doc.autoTable(opt);
-            // doc.autoTable({
-                // headStyles: { 
-                //     minCellHeight: headerHeight,
-                //     overflow: 'hidden',
-                //     halign: 'center', // จัดข้อความแนวนอนให้อยู่ตรงกลาง
-                //     valign: 'middle', // จัดข้อความแนวตั้งให้อยู่กึ่งกลาง
-                // },
-                // styles: { 
-                //     font: "freesiaUPC",
-                //     fontSize : 12,
-                //     cellPadding: 1,
-                //     lineColor : 'black',
-                //     lineWidth : 0.1,
-                //     cellPadding : 0.5
-                // },
-                // theme: 'plain',
-                // margin: { left: 5, right: 5, bottom: 5 },
-                // startY: 30, // เริ่มจากตำแหน่งใต้หัวตาราง
-                // columns: columns,
-                // columnStyles: columnStyles, 
-                // body: data,
-                // didDrawCell: (data) => {
-                //     if (data.section === 'head' && data.column.index > 7) {
-                //         const text = columns[data.column.index].header;
-                  
-                //         // คำนวณตำแหน่งให้อยู่ตรงกลาง
-                //         const x = data.cell.x + data.cell.width / 2+1;
-                //         const y = data.cell.y + data.cell.height - 1; // ลดตำแหน่ง Y เพื่อให้ข้อความหมุนอยู่ด้านล่างเซลล์
-                  
-                //         if(data.column.index <= 9){
-                //             doc.setFillColor(201, 233, 210); 
-                //         }else{
-                //             doc.setFillColor(120, 157, 188);
-                //         }
-                //         // ลบข้อความเดิม
-                //         doc.rect(data.cell.x, data.cell.y, data.cell.width, headerHeight, 'F');
-                  
-                //         // หมุนข้อความ
-                //         doc.text(text, x, y, { 
-                //             angle: 90, 
-                //         });
-                //         // Add border
-                //         doc.setDrawColor(0);
-                //         doc.setLineWidth(0.1);
-                //         doc.rect(data.cell.x, data.cell.y, data.cell.width, headerHeight);
-                //     }
-                // },
-                // didParseCell: (data) => {
-                //     if (data.section === 'body') {
-                //         if(data.column.index > 9){
-                //             if (data.cell.raw === 'Y') {
-                //                 data.cell.styles.fillColor = [77, 235, 191]; // สีพื้นหลังเขียวอ่อน
-                //             }
-                //             data.cell.styles.halign = 'center'; // จัดตำแหน่งข้อความตรงกลาง
-                //         }
-                //         if(data.column.index < 5 || (data.column.index >= 7 && data.column.index <= 9 )){
-                //             data.cell.styles.halign = 'center'; // จัดตำแหน่งข้อความตรงกลาง
-                //         }
-                //     }
-                //     if (data.section === 'head' && data.column.index <= 7){
-                //         data.cell.styles.fillColor = [173, 216, 230]; // สีพื้นหลังใหม่ (ฟ้าอ่อน)
-                //         data.cell.styles.overflow = 'linebreak';
-
-                //     }
-                // },
-                // didDrawPage: function (data) {
-                //     doc.setFontSize(10)
-                //     doc.text(`REV. NO. ${revisionList.MASTER}`, 5, 5);
-                //   }
-            // });
             fileName = `List of chemical Rev ${revisionList.MASTER}.pdf`;
-            // const loadFont = async () => {
-            //     // const response = await fetch(`${host}assets/dist/fonts/freesiaUPC/upcfl.ttf`); // ใส่ path ของไฟล์ฟอนต์
-            //     const response = await fetch(`${host}assets/dist/fonts/freesiaUPC/upcfl.ttf`); // ใส่ path ของไฟล์ฟอนต์
-            //     const fontData = await response.arrayBuffer();
-            //     const fontBase64 = btoa(
-            //       String.fromCharCode(...new Uint8Array(fontData))
-            //     );
-              
-            //     // console.log(response, fontData, fontBase64);
-            //     console.log(response, fontData, fontBase64);
-                
-            //     // เพิ่มฟอนต์ใน jsPDF
-            //     const doc = new jsPDF();
-            //     doc.addFileToVFS("upcfl.ttf", fontBase64);
-            //     doc.addFont("upcfl.ttf", "freesiaUPC", "normal");
-            //     doc.setFont("freesiaUPC");
-              
-            //     // ใช้ฟอนต์ใน AutoTable
-            //     doc.autoTable({
-            //       styles: { font: "freesiaUPC", fontSize: 12 },
-            //       headStyles: { font: "freesiaUPC", fontSize: 14 },
-            //     //   body: [
-            //     //     { column1: "ภาษาไทย", column2: "ทดสอบ" },
-            //     //     { column1: "jsPDF", column2: "ฟอนต์ภาษาไทย" },
-            //     //   ],
-            //     //   columns: [
-            //     //     { header: "หัวข้อ 1", dataKey: "column1" },
-            //     //     { header: "หัวข้อ 2", dataKey: "column2" },
-            //     //   ],
-            //     column: footerText,
-            //     body:footerText,
-            //     });
-            //     doc.save("example-freesiaUPC.pdf");
-            // };
-            // loadFont();
         }else{
             const tableID = $(this).attr('tableID');
             const table = $(tableID).DataTable();
@@ -1482,7 +1130,6 @@ $(document).on('click', '#exportPDF',async function(){
                 item.REC4052 = item.REC4052 == '1' ? 'OK' : 'N/A';
                 item.REC4054 = item.REC4054 == '1' ? 'OK' : 'N/A';
             });
-            console.log(data);
             
             const columnsData = [
                 { header: 'No.',                   dataKey: 'No' },
@@ -1535,59 +1182,15 @@ $(document).on('click', '#exportPDF',async function(){
                 doc.text(`REV. NO. ${revisionList[own+'.']}`, 5, 5);
             }
             doc.autoTable(opt);
-            // doc.autoTable({ 
-            //     headStyles: { 
-            //         minCellHeight: headerHeight,
-            //         overflow: 'linebreak',
-            //         halign: 'center', // จัดข้อความแนวนอนให้อยู่ตรงกลาง
-            //         valign: 'middle', // จัดข้อความแนวตั้งให้อยู่กึ่งกลาง
-            //         fillColor : [173, 216, 230]
-            //     },
-            //     styles: { 
-            //         font: "freesiaUPC",
-            //         fontSize : 12,
-            //         cellPadding: 1,
-            //         lineColor : 'black',
-            //         lineWidth : 0.1,
-            //         cellPadding : 0.5
-            //     },
-            //     theme: 'plain',
-            //     margin: { left: 5, right: 5, bottom: 5 },
-            //     startY: 30, // เริ่มจากตำแหน่งใต้หัวตาราง
-            //     columns: columnsData,
-            //     columnStyles: columnStyles, 
-            //     body: data,
-            //     didParseCell: (data) => {
-            //         if (data.section === 'body') {
-            //             if([0, 1, 3, 9, 10, 11, 12].includes(data.column.index)){
-            //                 data.cell.styles.halign = 'center'; // จัดตำแหน่งข้อความตรงกลาง
-            //             }
-            //         }
-            //     },
-            //     didDrawPage: function (data) {
-            //         doc.setFontSize(10)
-            //         doc.text(`REV. NO. ${revisionList[own+'.']}`, 5, 5);
-            //     }
-            // });
             fileName = `${own} List of chemical Rev ${revisionList[own+'.']}.pdf`;
         }
-        console.log(optAutoTable);
-
         const colUsrCon = [{header: "CONTROLLER", dataKey: 'Controller'}]
         const controllers = res.userControl[res.owner+'.'] || [];
-        console.log(classData);
-        console.log(controllers);
-        
         let usrCon = [];
         if(controllers.length > 0){
             if(controllers.includes('|')){
-                console.log(controllers.split('|'));
-                
                 controllers.split('|').forEach((name, index) => {
-                    console.log(name);
-                    
                     usrCon.push({Controller: name});
-                    // return {Controller: name}
                 });
             }else{
                 usrCon.push({Controller: controllers});
@@ -1595,7 +1198,6 @@ $(document).on('click', '#exportPDF',async function(){
         }else{
             usrCon.push({Controller: '-'});
         }
-        console.log(usrCon);
 
         doc.autoTable({
             ...optAutoTable,
@@ -1612,22 +1214,6 @@ $(document).on('click', '#exportPDF',async function(){
         optCls.startY = doc.lastAutoTable.finalY; 
 
         doc.autoTable(optCls);
-        // doc.autoTable({
-        //     styles: { 
-        //         font: "freesiaUPC",
-        //         fontSize : 12,
-        //         cellPadding: 1,
-        //         lineColor : 'black',
-        //         lineWidth : 0.1,
-        //     },
-        //     headStyles: { font: "freesiaUPC", fontSize: 14, fillColor: [220, 220, 220]  },
-        //     theme: 'plain',
-        //     columns: columnClass,
-        //     body:classData,
-        //     margin: { left: 5, right: 5, bottom: 5 },
-        //     // showHead: "everyPage", // บังคับให้แสดงหัวตารางในทุกหน้า
-        //     startY: doc.lastAutoTable.finalY,
-        // });
         doc.save(fileName)
     });
 

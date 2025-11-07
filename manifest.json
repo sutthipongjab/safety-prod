@@ -3,7 +3,7 @@
   "name": "Workspace",
   "icons": [
     {
-      "src": "/itadmin/assets/images/icon_192.png",
+      "src": "/safety/assets/images/icon_192.png",
       "type": "image/png",
       "sizes": "192x192",
 	  "purpose": "any maskable"

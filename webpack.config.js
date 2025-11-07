@@ -1,12 +1,11 @@
+require("dotenv").config();
 const path = require("path");
-const webpack = require('webpack');
+const webpack = require("webpack");
+const Dotenv = require("dotenv-webpack");
+const CompressionPlugin = require("compression-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 module.exports = {
-    plugins: [
-        new webpack.ProvidePlugin({
-          $: 'jquery',
-          jQuery: 'jquery'
-        })
-      ],
     entry: {
         app: "./assets/script/apps.js",
         area: "./assets/script/area.js",
@@ -54,26 +53,89 @@ module.exports = {
         test: "./assets/script/test.js",
 
         // Form
-        form : "./assets/script/form.js",
-
+        form: "./assets/script/form.js",
     },
     output: {
         filename: "[name].bundle.js",
         path: path.resolve(__dirname, "assets/dist/js"),
     },
-    mode: "development", // ใช้โหมด development หรือ production
+    mode: process.env.STATE,
     //   devtool: "inline-source-map",
+    resolve: {
+        //prettier-ignore
+        alias: {
+            "@public": path.resolve(__dirname,"../form/assets/script/public/v1.0.3"),
+            jquery$: path.resolve(__dirname, "node_modules/jquery/src/jquery"),
+            "@indexDB": path.resolve(__dirname, "../form/assets/script/indexDB"),
+            "@styles": path.resolve(__dirname, "../form/assets/dist/css"),
+            "@api": path.resolve(__dirname, "../form/assets/script/api"),
+        },
+    },
     module: {
         rules: [
-        {
-            test: /\.css$/,
-            use: ["style-loader", "css-loader"],
-        },
+            {
+                test: /\.css$/,
+                use: ["style-loader", "css-loader"],
+            },
         ],
     },
-    //   optimization: {
-    //     splitChunks: {
-    //         chunks: "all",
-    //     },
-    // },
+    optimization: {
+        concatenateModules: true,
+        minimize: true,
+        // minimizer: [new TerserPlugin()],
+        minimizer: [
+            new TerserPlugin({
+                parallel: true, // ✅ เปิด multi-core minify
+                terserOptions: {
+                    format: {
+                        comments: false, // ลบคอมเมนต์ทิ้ง
+                    },
+                },
+                extractComments: false, // ไม่แยก LICENSE ออกมาเป็นไฟล์ .txt
+                exclude: /public/, // <<< อย่ามาย่อไฟล์ที่ copy มา
+            }),
+        ],
+    },
+    plugins: [
+        new Dotenv({
+            path: path.resolve(__dirname, "./.env"),
+        }),
+        new CompressionPlugin({
+            algorithm: "gzip", // หรือใช้ "brotliCompress" ก็ได้
+            test: /\.(js|css|html|svg)$/,
+            threshold: 10240,
+            minRatio: 0.8,
+            exclude: /public/, // <<< อย่ามาบีบอัดไฟล์ที่ copy มา
+        }),
+        new webpack.ProvidePlugin({
+            $: "jquery",
+            jQuery: "jquery",
+        }),
+        new CopyWebpackPlugin({
+            patterns: [
+                {
+                    from: path.resolve(
+                        __dirname,
+                        "../form/assets/script/public/v1.0.3"
+                    ),
+                    to: path.resolve(__dirname, "assets/script/public"),
+                    noErrorOnMissing: true,
+                    globOptions: {
+                        // เอาเฉพาะ js ก็พอ
+                        ignore: ["**/*.map", "**/*.json"], // จะไม่ก็อปไฟล์ขยะ
+                    },
+                },
+            ],
+        }),
+    ],
+    cache:
+        process.env.STATE === "production"
+            ? false
+            : {
+                  type: "filesystem",
+                  //   cacheDirectory: path.resolve(__dirname, '.cache/webpack'),
+                  buildDependencies: {
+                      config: [__filename],
+                  },
+              },
 };

@@ -45,12 +45,6 @@
                         </div>
                         <input class="input input-bordered w-full max-w-sm req" id="PUR_INCHARGE" name="PUR_INCHARGE" data-map="PUR_INCHARGE" placeholder="e.g. Noppamat">
                     </label>
-                    {{-- <label class="form-control w-full max-w-sm">
-                        <div class="label">
-                            <span class="label-text">UN CLASS</span>
-                        </div>
-                        <input class="input input-bordered w-full max-w-sm" id="UN_CLASS" name="UN_CLASS" data-map="UN_CLASS" placeholder="e.g. 2">
-                    </label> --}}
                     <label class="form-control w-full max-w-sm">
                         <div class="label">
                             <span class="label-text">UN CLASS</span>
