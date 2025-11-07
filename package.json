@@ -35,6 +35,9 @@
     "scripts": {
         "webpack:watch": "webpack --watch",
         "tailwind:watch": "npx tailwindcss -i ./assets/style/tailwind.css -o ./assets/dist/css/tailwind.css --watch",
-        "watch": "npm-run-all --parallel tailwind:watch webpack:watch"
+        "watch": "npm-run-all --parallel tailwind:watch webpack:watch",
+        "webpack:build": "webpack --mode production",
+        "tailwind:build": "npx tailwindcss -i ./assets/style/tailwind.css -o ./assets/dist/css/tailwind.css --minify",
+        "build": "npm-run-all --serial tailwind:build  webpack:build"
     }
 }
