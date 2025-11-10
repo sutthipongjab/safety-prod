@@ -1,30 +1,102 @@
 import $ from "jquery";
 import "select2";
 import "select2/dist/css/select2.min.css";
-import 'datatables.net-dt';
+import "datatables.net-dt";
 import "datatables.net-dt/css/dataTables.dataTables.min.css";
 import "datatables.net-responsive";
 import "datatables.net-responsive-dt";
-// import "datatables.net-dt/css/dataTables.dataTables.min.css";
 import "datatables.net-responsive-dt/css/responsive.dataTables.min.css";
 import { jsPDF } from "../lib/pdf.js";
-import html2canvas from 'html2canvas-pro';
-import {host, tableOption, showMessage, userInfoData ,ajaxOptions, getData , select2Option, domScroll, initJoin} from "../utils.js";
-import {writeExcelTemp, writeOpt, exportExcel, colToNumber, numberToCol} from '../_excel.js';
-import {getfileInPath} from '../_file.js';
-import {createColumnFilters} from '../filter.js';
-import {createStamp, loadFont, optAutoTable} from '../_jsPDF.js';
+import html2canvas from "html2canvas-pro";
+import {
+    host,
+    tableOption,
+    showMessage,
+    userInfoData,
+    ajaxOptions,
+    getData,
+    select2Option,
+    domScroll,
+    initJoin,
+    setDatePicker,
+} from "../utils.js";
+import {
+    writeExcelTemp,
+    writeOpt,
+    exportExcel,
+    colToNumber,
+    numberToCol,
+} from "../_excel.js";
+import { getfileInPath } from "../_file.js";
+import { createColumnFilters } from "../filter.js";
+import { createStamp, loadFont, optAutoTable } from "../_jsPDF.js";
 
-var sectionList, revisionList, table, freesiaUPC, freesiaUPC_BOLD, userControl, ownerCode;
+import {logFormData, getAllAttr} from '@public/jFuntion';
+import {formatDate} from '@public/_dayjs';
+import { updateChemicalSection } from "../api/chemical/chemical_section.js";
+
+
+var sectionList,
+    revisionList,
+    table,
+    freesiaUPC,
+    freesiaUPC_BOLD,
+    userControl,
+    ownerCode,
+    userInfo;
 var chmDetail = [];
 
-
 $(document).ready(async function () {
-    freesiaUPC = await loadFont(host, 'freesiaUPC/upcfl.ttf');
-    freesiaUPC_BOLD = await loadFont(host, 'freesiaUPC/upcfb.ttf');
-    $('#owner').select2({...select2Option, placeholder: 'เลือกแผนก'});
+    userInfo = await getAllAttr('.user-info-data');
+    freesiaUPC = await loadFont(host, "freesiaUPC/upcfl.ttf");
+    freesiaUPC_BOLD = await loadFont(host, "freesiaUPC/upcfb.ttf");
+    $("#owner").select2({ ...select2Option, placeholder: "เลือกแผนก" });
+
 });
 
+$(document).on("click", ".edit", function () {
+    const data = table.row($(this).closest("tr")).data();
+    
+    $("#AMEC_SDS_ID").val(data.AMEC_SDS_ID);
+    setDatePicker({
+        altInput: true,
+        altFormat: "d-M-y",
+        dateFormat: "d/m/Y",
+        defaultDate: data.RECEIVED_SDS_DATE,
+    },
+        `#RECEIVED_SDS_DATE`
+    );
+});
+
+$(document).on('click', '#save', async function(){
+    try{
+        const sdsDate = $('#RECEIVED_SDS_DATE').val();
+        const ownerCode = $('#owner').val();
+        const formData = new FormData($('#form-edit-sds')[0]);
+        formData.set('RECEIVED_SDS_DATE', formatDate(sdsDate, 'YYYY-MM-DD', 'DD/MM/YYYY'));
+        formData.append('OWNERCODE', ownerCode);
+        formData.append('USER_UPDATE', userInfo.sempno);
+        logFormData(formData);
+        
+        if(sdsDate == ''){
+            showMessage('กรุณาเลือกวันที่ Received SDS Date','warning');
+            return;
+        }
+        const res = await updateChemicalSection(formData);
+        if(res.status){
+            showMessage('บันทึกข้อมูลสำเร็จ','success');
+            $(`#edit`).prop('checked',false);
+            $(`#owner`).trigger('change');
+        }else{
+            showMessage('ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง Tel.2038','error');
+        }
+    } catch (error) {
+        console.error(error);
+        showMessage('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง Tel.2038','error');
+    }
+});
+
+// prettier-ignore
 $(document).on('change', '#owner', async function(){
     ownerCode = $(this).val();
     const data = await getData({ 
@@ -43,54 +115,13 @@ $(document).on('change', '#owner', async function(){
     }
 });
 
-
-
-
-
-// $(document).on('click', '#cancleRev', function(){
-//     $('#modal_rev').prop('checked', false);
-// });
-
-// $(document).on('click', '#modal_rev', function(){
-//     console.log('modal_rev');
-//     $('#current-revision').val(revisionList.MASTER).focus();
-// });
-
-// $(document).on('click', '#saveRev', async function(){
-//     const rev = $('#current-revision').val();
-//     if(rev == ''){
-//         showMessage('กรุณากรอก Revision','warning');
-//         return;
-//     }
-//     const ajax = {...ajaxOptions};
-//     ajax.url = `${host}Chemical/chemicalList/updateRev`;
-//     ajax.data = {rev:rev, own:'MASTER', USER_UPDATE: userInfoData.sempno};
-//     await getData(ajax).then(async (res) => {
-//         if(res.status == true){
-//             revisionList = res.rev;
-//             showMessage('บันทึกข้อมูลสำเร็จ','success');
-//             $('.revision-master').html(`Rev. No. ${rev.toUpperCase()}`);
-//             $('#cancleRev').trigger('click');
-//             // getMaster();
-//         }else if(res.status == 3){
-//             showMessage('กรุณากรอก Revision ใหม่','warning');
-
-//         }else{
-//             showMessage('บันทึกข้อมูลไม่สำเร็จ กรุณาลองใหม่ภายหลัง');
-//         }
-//     });
-// });
-
-
-
 /**
  * Set table
- * @param {object} data 
- * @param {object} sec 
+ * @param {object} data
+ * @param {object} sec
  */
+// prettier-ignore
 async function setTable(data, sec){
-    console.log(data, sec);
-    
     let html =``;
     const columns = [
         
@@ -98,10 +129,11 @@ async function setTable(data, sec){
             data:'AMEC_SDS_ID',        
             title: 'Detail',
             render: function(data, type, row, meta){
-                return `<div class="">
+                return `<div class="flex gap-2">
                             <label for="modal_detail" class="drawer-button btn btn-xs btn-neutral flex items-center tooltip tooltip-right" data-tip="รายละเอียด " id="view-detail">
                                 <i class="icofont-eye-alt"></i>
                             </label>    
+                            <label for="edit" class="btn btn-xs btn-neutral tooltip tooltip-right flex edit" data-tip="แก้ไข"><i class="icofont-edit"></i></label>
                         </div>
                         `
             }
@@ -146,13 +178,9 @@ async function setTable(data, sec){
     ];
         
         for (const [key, value] of Object.entries(data)) {
-            console.log(data);
-            
             const index = Object.keys(data).indexOf(key);
             const check = index == 0 ? 'checked' : ''; 
             const org = key.slice(0, -1).replace(/\s+/g, '_');
-            console.log(org);
-            
             html += `
                     <div  class="w-full">
                         <div class="font-bold">
@@ -167,24 +195,19 @@ async function setTable(data, sec){
         $('.data-table').html(html);
         Object.entries(data).forEach(async ([key, value], index) => {
             const org = key.slice(0, -1).replace(/\s+/g, '_');
-            console.log(org);
-            
             table = await createTable(`#${org}`, value, columns);
             createColumnFilters(table, '1-12');
         });
 }
 
-
-
 /**
  * Table upload
- * @param {string} tableID 
- * @param {object} data 
- * @returns 
+ * @param {string} tableID
+ * @param {object} data
+ * @returns
  */
+// prettier-ignore
 async function createTable(tableID, data, columns, maxH = '60vh'){
-    console.log('create table',tableID, data, columns);
-    
     const opt = { ...tableOption };
     opt.lengthMenu = [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'All']]
     opt.order = [[0, 'asc']];
@@ -204,14 +227,13 @@ async function createTable(tableID, data, columns, maxH = '60vh'){
     opt.columnDefs = [
         { orderable: false, targets: '_all' } // ปิดการเรียงในคอลัมน์ที่กำหนด
     ];
-    
     return $(tableID).DataTable(opt);
 }
 
-    
 /**
  * Export excel
  */
+// prettier-ignore
 $(document).on('click', '#exportExcel',async function(){
     const tableID = $(this).attr('tableID');
     const table = $(tableID).DataTable();
@@ -227,16 +249,14 @@ $(document).on('click', '#exportExcel',async function(){
     }
 });
 
-
 /**
  * Set data to export excel safety chemical master section
- * @param {object} data 
+ * @param {object} data
  * @param {string} fileName e.g. QC1 SEC
  */
+// prettier-ignore
 async function exportMasterSec(data, fileName){
-    console.log(data);
     const template = await getfileInPath('assets/file/Template','Chemical list section.xlsx')
-    console.log('template',template);
     if(template.length > 0){
         const file = template[0].buffer;
         const opt = {...writeOpt};
@@ -256,8 +276,6 @@ async function exportMasterSec(data, fileName){
                 from: `A${opt.startRow-1}`, 
                 to:   `${numberToCol(Object.keys(data[0]).length+1)}${opt.startRow-1}`, 
             };
-            
-            console.log(data.length);
             
             sheet.getCell(opt.startRow+1, colToNumber('J')).value = { formula: `=SUM(J${opt.startRow}:J${opt.startRow+data.length-1})` }; 
 
@@ -281,14 +299,10 @@ async function exportMasterSec(data, fileName){
                     colIndex++;
                 });
             });
-            // console.log(fileName,userControl,userControl[`${fileName}.`] );
             rowIndex+=3;
             const userCon = userControl[`${fileName}.`] || '';
             if(userCon != ''){
                 if(userCon.includes('|')){
-                    console.log(rowIndex,userCon.split('|').length+1);
-                    
-                    // await sheet.duplicateRow(rowIndex, userCon.split('|').length+1, true);
                     sheet.insertRow(rowIndex, []);
                     sheet.getCell(rowIndex, 3).value = 'CONTROLLER'; 
                     rowIndex++;
@@ -301,48 +315,25 @@ async function exportMasterSec(data, fileName){
                     sheet.getCell(rowIndex, 3).value = userCon; 
                 }
             }else{
-                // rowValues[3] = 'CONTROLLER';
-                // await sheet.insertRow(rowIndex, rowValues);
-                // rowValues[3] = '-';
-                // await sheet.insertRow(rowIndex+1, rowValues);
-                // console.log(rowIndex);
                 sheet.insertRow(rowIndex, []);
                 sheet.getCell(rowIndex, 3).value = 'CONTROLLER'; 
                 sheet.insertRow(rowIndex+1, []);
                 sheet.getCell(rowIndex+1, 3).value = '-'; 
-                // sheet.insertRow(rowIndex, [ , , , 'CONTROLLER']);
-                // sheet.insertRow(rowIndex+1, [ , , , '-']);
-
-
-                
-                // sheet.getRow(19).values = []
-                // console.log(sheet.rowCount, sheet.getRow(19))
-                // sheet.getCell(rowIndex, 3).value = 'CONTROLLER'; 
-                // await sheet.insertRow(rowIndex, [])
-                // await sheet.duplicateRow(rowIndex, 2);
-                // sheet.getCell(rowIndex, 3).value = 'CONTROLLER'; 
-                // sheet.getCell(rowIndex+1, 3).value = '-'; 
             }
-            
-
         };
         const wb = await writeExcelTemp(file.buffer,opt);
-        console.log('wb',wb);
         exportExcel(wb, `Chemical list ${fileName}`)
     }else{
         showMessage('ไม่พบไฟล์ Template ติดต่อ admin 2038');
     }
 }
 
-
-
+// prettier-ignore
 $(document).on('click', '#exportPDF',async function(){
-
     const ajax = {...ajaxOptions};
     ajax.url = `${host}Chemical/chemicalList/getDataForPDF`;
     ajax.data = {owner: $(this).attr('tableID').replace('#','').replace('_',' ')};
     await getData(ajax).then(async (res) => {
-        console.log(res);
         const currentYear = new Date().getFullYear();
         const currentSMon = new Date().toLocaleString('default', { month: 'short' });
         const currentDay  = new Date().getDate();
@@ -359,17 +350,11 @@ $(document).on('click', '#exportPDF',async function(){
 
         const colUsrCon = [{header: "CONTROLLER", dataKey: 'Controller'}]
         const controllers = res.userControl[res.owner+'.'] || [];
-        console.log(classData);
-        console.log(controllers);
         
         let usrCon = [];
         if(controllers.length > 0){
             if(controllers.includes('|')){
-                console.log(controllers.split('|'));
-                
                 controllers.split('|').forEach((name, index) => {
-                    console.log(name);
-                    
                     usrCon.push({Controller: name});
                     // return {Controller: name}
                 });
@@ -379,10 +364,6 @@ $(document).on('click', '#exportPDF',async function(){
         }else{
             usrCon.push({Controller: '-'});
         }
-        console.log(usrCon);
-        
-
-       
         const doc = new jsPDF({
             orientation: 'landscape',
         })
@@ -401,8 +382,6 @@ $(document).on('click', '#exportPDF',async function(){
         doc.rect(273, 6, 19, 22);
         doc.rect(273, 6, 19, 5);
 
-        
-    
         const tableID = $(this).attr('tableID');
         const table = $(tableID).DataTable();
         const own = tableID.replace('#','').replace('_',' ');
@@ -412,8 +391,6 @@ $(document).on('click', '#exportPDF',async function(){
             item.REC4052 = item.REC4052 == '1' ? 'OK' : 'N/A';
             item.REC4054 = item.REC4054 == '1' ? 'OK' : 'N/A';
         });
-        console.log(data);
-        
         const columnsData = [
             { header: 'No.',                   dataKey: 'No' },
             { header: 'ID',                    dataKey: 'AMEC_SDS_ID' },
@@ -467,8 +444,6 @@ $(document).on('click', '#exportPDF',async function(){
         doc.autoTable(opt);
         fileName = `${own} List of chemical Rev ${revisionList[own+'.']}.pdf`;
        
-        console.log(optAutoTable);
-
         doc.autoTable({
             ...optAutoTable,
             headStyles:{font: "freesiaUPC", fontSize: 14, fillColor: [220, 220, 220]},
@@ -489,10 +464,9 @@ $(document).on('click', '#exportPDF',async function(){
 
 });
 
+// prettier-ignore
 $(document).on('click', '#exportPDFDetail', function(){
-    console.log(chmDetail);
     html2canvas(document.getElementById("print-preview")).then(function(canvas) {
-        console.log(canvas);
          const imgData = canvas.toDataURL('image/png');
 
         // สร้าง PDF (A4, หน่วย mm)
@@ -534,10 +508,10 @@ $(document).on('click', '#exportPDFDetail', function(){
     
 });
 
-
 /**
  * Chemical detail
  */
+// prettier-ignore
 $(document).on('click', '#view-detail',async function(){
     $('.detail-Loading').removeClass('hidden');
     $('.detail').addClass('hidden');
@@ -555,8 +529,6 @@ $(document).on('click', '#view-detail',async function(){
         $('#detail-chemical').prop('checked',true);
 
         const d = res.detail[0];
-        console.log( res, d);
-            
         const genaralCol = ` 
             <span class="font-bold">ชื่อสารเคมี</span>
             <span class="font-bold">ปริมาณที่ใช้</span>
@@ -669,8 +641,6 @@ $(document).on('click', '#view-detail',async function(){
         $('.efc-detail').html(efcCol+efcData);
         $('.bp-detail').html(bpCol+bpData+sds);
         $('.safety2-detail').html(safety2Col+safety2Data);
-
-        console.log($('.preview-detail').find('.layout-file'));
         
         $('.preview-chmName').html(`ข้อมูลสารเคมี ${d.CHEMICAL_NAME}`);
         $('.preview-detail').html(genaralCol+safety1Col+efcCol+bpCol+safety2Col+generalData+safety1Data+efcData+bpData+safety2Data);
@@ -682,16 +652,4 @@ $(document).on('click', '#view-detail',async function(){
         showMessage('ไม่พบข้อมูล','warning');
         $('#modal_detail').prop('checked',false);
     }
-    console.log(data);
-    console.log(res);
 });
-
-// function checkroll(val, t = 'จำเป็น', f = 'ไม่จำเป็น'){
-//     if(!val) return '-';
-//     return val == 1 ? `<span class="text-green-500 ">${t}</span>` : `<span class="text-red-500 ">${f}</span>`;
-// }
-
-
-
-
- 

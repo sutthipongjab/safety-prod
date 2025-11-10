@@ -273,34 +273,20 @@ export const setDatePicker = (options = {}, e = '') => {
  */
 // export function checkAuthen(url, status){
 export function checkAuthen(xhr, status=''){
-    // console.log(xhr);
-    // console.log(status);
-
-    // const response = JSON.parse(xhr.responseText);
-    // console.log(response);
-    // // ตรวจสอบสถานะ
-    // if (response.status === "403") {
-    //     window.location.href = host;
-    // }
-    
     
     try{
-        console.log(xhr);
-        
         if (!xhr.responseJSON) {
             throw new Error('Response is not JSON');
         }else{
             // datatype only json
             const statusCode  = xhr.responseJSON.status;
             const urlRedirect = xhr.responseJSON.url;
-            // console.log('statusCode', statusCode);
-            // console.log('urlRedirect', urlRedirect);
             if (statusCode == '403' && urlRedirect) {
                 window.location.href = urlRedirect;
             }
         }
     } catch (error) {
-        // console.error("Error in checkAuthen: ", error);
+        console.error("Error in checkAuthen: ", error);
         return;
     }
     
@@ -312,27 +298,19 @@ export function checkAuthen(xhr, status=''){
 }
 
 export function showpreload(){
-    // console.log(3);
-    
     $('.preload').removeClass('hidden');
 }
 
 export function hidepreload(){
-    // console.log(4);
-    
     $('.preload').addClass('hidden');
 }
 
 export async function showpreloader(){
-    // console.log(1);
-    
     $('#preload').removeClass('hidden');
     $('#preload').find('div').removeClass('bg-opacity-50');
 }
 
 export async function hidepreloader(){
-    // console.log(2);
-    
     $('#preload').addClass('hidden');
     $('#preload').find('div').addClass('bg-opacity-50');
 }
@@ -390,12 +368,9 @@ export async function requiredForm(form, fields=[], position = ''){
         const target = $(this);
         
         if(RequiredElement(target)){
-            // console.log(target);
             check = true;
-            // console.log('check',check);
         }
     });
-    // console.log('check',check);
     
     if (fields.length == 0 && check) {
         showMessage('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning', position);
@@ -403,8 +378,6 @@ export async function requiredForm(form, fields=[], position = ''){
     }
     for (const field of fields) {
         if (!field.element.val() || field.element.val().length === 0) {
-            // console.log(field.element);
-            
             showMessage(field.message, 'warning', position);
             return false;
         }
@@ -413,17 +386,6 @@ export async function requiredForm(form, fields=[], position = ''){
 
 }
 
-// /**
-//  * Check required form
-//  * @param {string} className e.g. .list-inspection
-//  */
-// export function requiredForm(className){
-//     $(className).find('input, select, textarea').each(function() {
-//         const target = $(this);
-//         RequiredElement(target);
-//     });
-// }
-
 /**
  * Check Required element
  * @param {object} e 
@@ -431,18 +393,12 @@ export async function requiredForm(form, fields=[], position = ''){
 export function RequiredElement(e){
     // console.log(e);
     const groupName = e.attr('name');
-    // const isEmptyRadioWithReq = (e.prop('checked') === false && (e.prop('type') === 'radio' || e.prop('type') == 'checkbox') && e.hasClass('req'));
     const isEmptyRadioWithReq = ($(`input[name="${groupName}"].req:checked`).length === 0 && (e.prop('type') === 'radio' || e.prop('type') == 'checkbox') && e.hasClass('req'));
     const isEmptyWithReq      = ((e.val() === '' || e.val().length === 0) && e.hasClass('req')); // Fixed '=' to '===' and checked length
-    // console.log(isEmptyRadioWithReq, isEmptyWithReq, e);
-    
     if (isEmptyRadioWithReq || isEmptyWithReq) {
-        // console.log('addClassError', e);
         addClassError(e);
         return true;
     }else{
-        // console.log('removeClassError', e);
-        
         removeClassError(e);
         return false;
     }
@@ -453,7 +409,6 @@ export function RequiredElement(e){
  * @param {object} e 
  */
 export function addClassError(e){
-    // console.log(e.prop('type'), e);
     if(e.is('input')){
         const groupName = e.attr('name'); 
         if($(`input[name="${groupName}"].req:checked`).length === 0){
@@ -465,21 +420,6 @@ export function addClassError(e){
                 e.addClass('input-error');
             }
         }
-        // if(e.prop('type') == 'radio' ){
-        //     const groupName = e.attr('name'); 
-        //     if($(`input[name="${groupName}"].req:checked`).length === 0){
-        //         $(`input[name="${groupName}"]`).addClass('radio-error');
-        //     }
-        // }else if (e.prop('type') == 'checkbox') {
-        //     const groupName = e.attr('name'); 
-        //     // console.log(groupName);
-            
-        //     if($(`input[name="${groupName}"].req:checked`).length === 0){
-        //         $(`input[name="${groupName}"]`).addClass('checkbox-error');
-        //     }
-        // }else{
-        //     e.addClass('input-error');
-        // }
     }else if(e.is('select')){
         e.next('.select2-container').addClass('select-error');
     }else if(e.is('textarea')){
@@ -604,24 +544,15 @@ export function getData(ajaxOptions){
         const options = {
             ...ajaxOptions,
             success: function (res) {
-                // console.log(res);
-                // console.log(typeof res);
                 resolve(res); 
             },
-            // error: function (xhr, err) {
-            //     console.log(xhr, err);
-            //     // sendmail(`Ajax error ${}`)
-            //     reject(err); 
-            // },
             error: function (xhr, textStatus, errorThrown) {
-                // console.log(xhr, textStatus, errorThrown);
                 let error = new Error(errorThrown || "Unknown AJAX error");
                 error.status = xhr.status;
                 error.responseText = xhr.responseText; 
                 reject(error);
             },
         };
-        // console.log(options);
         
         $.ajax(options);
     });

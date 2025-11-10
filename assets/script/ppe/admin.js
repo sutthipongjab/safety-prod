@@ -1,8 +1,6 @@
 import $ from "jquery";
-import { createForm, deleteForm, showFlow } from "../_form.js";
 import { host, tableOption, showMessage } from "../utils.js";
 import DataTable from "datatables.net-dt";
-import { Table } from "jspdf-autotable";
 import ExcelJS from "exceljs";
 import { getfileInPath, getArrayBufferFile } from "../_file.js";
 // var host = window.location.origin + "/safety/";

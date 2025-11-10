@@ -29,7 +29,7 @@ class Authen extends MY_Controller {
 		unset($_SESSION['menu']);
         setcookie($_ENV['APP_NAME'], "", time() - 3600, "/");
         setcookie('safety_session', "", time() - 3600, "/");
-		redirect(root_url().'form/authen/index/'.$this->program);
+		redirect($_ENV['APP_HOST'].'/form/authen/index/'.$this->program);
 		// redirect('https://' . $_SERVER['HTTP_HOST'].'/form/authen/pass_logout/'.$this->program);
     }
 
