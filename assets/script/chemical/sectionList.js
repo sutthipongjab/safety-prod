@@ -172,7 +172,7 @@ async function setTable(data){
                 return data == 1 ? 'OK' : 'N/A';    
             }
         },
-        {data:'CLASS',              title: 'Class'},
+        {data:'CLASSNAME',              title: 'Class'},
     ];
     
         
@@ -288,7 +288,8 @@ async function exportMasterSec(data, fileName){
                 sheet.getCell(rowIndex, 1).value = index+1; // No.
 
                 Object.entries(d).forEach(([key, value]) => {
-                    if(['QTY', 'AMEC_SDS_ID', 'CLASS'].includes(key)){
+                    if(['CLASS'].includes(key)){ return; } // ข้าม column นี้
+                    if(['QTY', 'AMEC_SDS_ID'].includes(key)){
                         sheet.getCell(rowIndex, colIndex).value = parseInt(value); 
                     }else if(['REC4052', 'REC4054'].includes(key)){
                         sheet.getCell(rowIndex, colIndex).value = parseInt(value) == 1 ? 'OK' : 'N/A';
@@ -403,7 +404,7 @@ $(document).on('click', '#exportPDF',async function(){
             { header: 'จำนวน',                 dataKey: 'QTY' },
             { header: 'REC 4052',              dataKey: 'REC4052' },
             { header: 'REC 4054',              dataKey: 'REC4054' },
-            { header: 'CLASS',                 dataKey: 'CLASS' },
+            { header: 'CLASS',                 dataKey: 'CLASSNAME' },
         ];
         const columnStyles = {
             No:                { cellWidth: 7 },

@@ -28,7 +28,7 @@ const columnRebuild = [
     {data:'CHEMICAL_NAME',     title: 'Chemical Name'},
     {data:'VENDOR',            title: 'MANUFACTURER / VENDOR'},
     {data:'PUR_INCHARGE',      title: 'PUR. INCHARGE'},
-    {data:'UN_CLASS',          title: 'CLASS'},
+    {data:'CLASS',          title: 'CLASS'},
     {data:'REV',               title: 'Rev.'},
 
 ];
@@ -44,7 +44,7 @@ const columnRebuildSec = [
     { data: "USED_AREA", title: "จุดใช้งาน"},
     { data: "KEEPING_POINT", title: "จุดจัดเก็บ"},
     { data: "QTY", title: "จำนวน"},
-    { data: "CLASS", title: "CLASS"},
+    { data: "CLASSNAME", title: "CLASS"},
     
 ];
 
@@ -106,7 +106,7 @@ $(document).on("click", "#add-chemical", async function (e) {
 $(document).on("click", ".edit-chemical", async function (e) {
     $('#headeritem').text('แก้ไขข้อมูลสารเคมี');
     const data = table.row($(this).parents("tr")).data();
-
+    
     const frm = $("#chemical-master");
     for (const [key, value] of Object.entries(data)) {
         const target = frm.find(`[data-map="${key}"]`);
@@ -606,7 +606,7 @@ async function setTable(data, sec){
                     }, 
                     {data:'VENDOR',            title:'MANUFACTURER / VENDOR'},
                     {data:'PUR_INCHARGE',      title:'PUR. INCHARGE'},
-                    {data:'UN_CLASS',          title:'CLASS'},
+                    {data:'CLASS',          title:'CLASS'},
                     {data:'REV',               title:'Rev.'},
                     
                 ];
@@ -681,7 +681,7 @@ async function setTable(data, sec){
                     return data == 1 ? 'OK' : 'N/A';    
                 }
             },
-            {data:'CLASS',              title: 'Class'},
+            {data:'CLASSNAME',              title: 'Class'},
         ];
         html =`<div role="tablist" class="tabs tabs-lifted w-full grid-cols-[0fr]">`;
         for (const [key, value] of Object.entries(data)) {
@@ -873,14 +873,17 @@ async function exportMaster(data){
                             sheet.getCell(rowIndex, colIndex).style = JSON.parse(JSON.stringify(thinCen));
                         }
                     }
-
+                    if(['UN_CLASS'].includes(key)){
+                        return; // ข้าม column นี้
+                    }
                     if(key.includes('AMEC_SDS_ID')){
                         sheet.getCell(rowIndex, colIndex+2).value = parseInt(value); 
                         sheet.getCell(rowIndex, colIndex+2).style = JSON.parse(JSON.stringify(thinCen));
                     }else if(['RECEIVED_SDS_DATE', 'EFFECTIVE_DATE'].includes(key)){
                         sheet.getCell(rowIndex, colIndex-1).value = value; 
-                    }else if(key.includes('UN_CLASS')){
-                        sheet.getCell(rowIndex, colIndex).value = parseInt(value); 
+                    }else if(key.includes('CLASS')){
+                        // sheet.getCell(rowIndex, colIndex).value = parseInt(value); 
+                        sheet.getCell(rowIndex, colIndex).value = value; 
                         sheet.getCell(rowIndex, colIndex).style = JSON.parse(JSON.stringify(thinCen));
                     }else if(key.includes('REV')){
                         sheet.getCell(rowIndex, colIndex).style = JSON.parse(JSON.stringify(thinCen));
@@ -939,7 +942,8 @@ async function exportMasterSec(data, fileName){
                 sheet.getCell(rowIndex, 1).value = index+1; // No.
 
                 Object.entries(d).forEach(([key, value]) => {
-                    if(['QTY', 'AMEC_SDS_ID', 'CLASS'].includes(key)){
+                    if(['CLASS'].includes(key)){return;} // ข้าม column นี้
+                    if(['QTY', 'AMEC_SDS_ID'].includes(key)){
                         sheet.getCell(rowIndex, colIndex).value = parseInt(value); 
                     }else if(['REC4052', 'REC4054'].includes(key)){
                         sheet.getCell(rowIndex, colIndex).value = parseInt(value) == 1 ? 'OK' : 'N/A';
@@ -1037,7 +1041,7 @@ $(document).on('click', '#exportPDF',async function(){
                 { header: 'CHEMICAL NAME/TRADE NAME', dataKey: 'CHEMICAL_NAME' },
                 { header: 'MANUFACTURER / VENDOR',    dataKey: 'VENDOR' },
                 { header: 'PUR. INCHARGE',            dataKey: 'PUR_INCHARGE' },
-                { header: 'CLASS',                 dataKey: 'UN_CLASS' },
+                { header: 'CLASS',                    dataKey: 'CLASS' },
                 { header: 'REV',                      dataKey: 'REV' },
             ];
             const colSec = res.sec.map((s) =>{
@@ -1056,7 +1060,7 @@ $(document).on('click', '#exportPDF',async function(){
                 CHEMICAL_NAME:     { cellWidth: 'auto' },
                 VENDOR:            { cellWidth: 'auto' },
                 PUR_INCHARGE:      { cellWidth: 'auto' },
-                UN_CLASS:          { cellWidth: 4 },
+                UN_CLASS:          { cellWidth: 'auto' },
                 REV:               { cellWidth: 4 },
             };
             columns.forEach((col, index) => {
@@ -1147,7 +1151,7 @@ $(document).on('click', '#exportPDF',async function(){
                 { header: 'จำนวน',                 dataKey: 'QTY' },
                 { header: 'REC 4052',              dataKey: 'REC4052' },
                 { header: 'REC 4054',              dataKey: 'REC4054' },
-                { header: 'CLASS',                 dataKey: 'CLASS' },
+                { header: 'CLASS',                 dataKey: 'CLASSNAME' },
             ];
             const columnStyles = {
                 No:                { cellWidth: 7 },
