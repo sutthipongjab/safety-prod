@@ -47,7 +47,6 @@ class chemicalList extends MY_Controller {
     }
     public function getChmSec(){
         $OWNERCODE = $this->input->post('OWNERCODE');
-        $OWNER = $this->input->post('OWNER');
         $res['data'] = [];
         $res['status'] = 0;
         $res['rev'] = $this->getRev();
@@ -56,7 +55,7 @@ class chemicalList extends MY_Controller {
         
         $chm = $this->che->getChemicalSec($OWNERCODE);
         if(!empty($chm)){
-            $res['data'][strtoupper($OWNER)] = $chm;
+            $res['data'][$OWNERCODE] = $chm;
             $res['status'] = 1;
         }
             
@@ -175,6 +174,7 @@ class chemicalList extends MY_Controller {
         $res = [];
         foreach($rev as $r){
             $res[strtoupper($r->OWNER)] = $r->REV;
+            $res[strtoupper($r->OWNERCODE)] = $r->REV;
         }
         return $res;
     }
@@ -260,34 +260,25 @@ class chemicalList extends MY_Controller {
 
     public function statusOn(){
         $data  = json_decode($_POST['data'], true);
-        // $sec   = json_decode($_POST['sec'], true);
         $testM = array();
         $test  = array();
         $status = 0;
         foreach($data as $d){
             $dUp = array('STATUS' => 1);
-            // var_dump($d);
-            // var_dump($d['AMEC_SDS_ID']);
             $conUpM = array('AMEC_SDS_ID' => $d['AMEC_SDS_ID']);
             $this->che->trans_start();
             foreach($d as $key => $val){
                 if((strpos($key, 'SEC') !== false || strpos($key, 'DEPT') !== false || strpos($key, 'Sec') !== false) && $val == 'Y'){
-                    // $conUp['OWNER'] = $key.'.';
                     $conUpS = array(
                         'AMEC_SDS_ID' => $d['AMEC_SDS_ID'],
                         'OWNER'       => $key.'.'
                     );
-                    // $test['test'][] = $conUpS;
                     $status = $this->che->update('STY_CHEMICAL_SECTION', $dUp, $conUpS);
                 }
             }
             $status = $this->che->update('STY_CHEMICAL', $dUp, $conUpM);
             $this->che->trans_complete();
-            // $testM['testM'][] = $conUp;
         }
-        // $id = $_POST['id'];
-        // $res = $this->che->update('STY_CHEMICAL', array('STATUS' => 1), array('AMEC_SDS_ID' => $id));
-        // $sec = $this->che->getCheAllSec();
         $res = array(
             'data'   => $data,
             'status' => $status,
@@ -302,15 +293,7 @@ class chemicalList extends MY_Controller {
             foreach ($dataStamp as $stamp) {
                 $stamp->aprDate = empty($stamp->APPROVE_DATE) ? date('j M Y') : date('j M Y', strtotime($stamp->APPROVE_DATE));
             }
-            // $dataStamp[0]->aprDate = date('j M Y', strtotime($dataStamp[0]->APPROVE_DATE));
         }
-        // else  {
-        //     // $dataStamp = $this->usr->getSTManager();
-        //     $dataStamp[0]->aprDate = date('j M Y');
-        //     // if (!empty($dataStamp)) {
-        //         // $dataStamp[0]->aprDate = date('j M Y');
-        //     // }
-        // }
 
         $res = array(
             'sec'     => $this->che->getCheAllSec('*'),

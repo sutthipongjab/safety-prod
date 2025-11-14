@@ -36,8 +36,7 @@ import {formatDate} from '@public/_dayjs';
 import { updateChemicalSection } from "../api/chemical/chemical_section.js";
 
 
-var sectionList,
-    revisionList,
+var revisionList,
     table,
     freesiaUPC,
     freesiaUPC_BOLD,
@@ -102,14 +101,13 @@ $(document).on('change', '#owner', async function(){
     const data = await getData({ 
         ...ajaxOptions ,
         url: `${host}chemical/chemicalList/getChmSec`,
-        data:{OWNERCODE: $(this).val(), OWNER: $(this).find('option:selected').attr('owner')}
+        data:{OWNERCODE: ownerCode}
     });
     if(data.status == 1){
         $('.divider').removeClass('hidden');
-        sectionList  = data.sec;
         revisionList = data.rev;
         userControl  = data.userControl;
-        setTable(data.data,data.sec);
+        setTable(data.data);
     }else{
         showMessage('ไม่พบข้อมูล กรุณาเลือกใหม่');
     }
@@ -121,7 +119,7 @@ $(document).on('change', '#owner', async function(){
  * @param {object} sec
  */
 // prettier-ignore
-async function setTable(data, sec){
+async function setTable(data){
     let html =``;
     const columns = [
         
@@ -176,6 +174,7 @@ async function setTable(data, sec){
         },
         {data:'CLASS',              title: 'Class'},
     ];
+    
         
         for (const [key, value] of Object.entries(data)) {
             const index = Object.keys(data).indexOf(key);

@@ -28,7 +28,7 @@ const columnRebuild = [
     {data:'CHEMICAL_NAME',     title: 'Chemical Name'},
     {data:'VENDOR',            title: 'MANUFACTURER / VENDOR'},
     {data:'PUR_INCHARGE',      title: 'PUR. INCHARGE'},
-    {data:'UN_CLASS',          title: 'UN CLASS'},
+    {data:'UN_CLASS',          title: 'CLASS'},
     {data:'REV',               title: 'Rev.'},
 
 ];
@@ -606,7 +606,7 @@ async function setTable(data, sec){
                     }, 
                     {data:'VENDOR',            title:'MANUFACTURER / VENDOR'},
                     {data:'PUR_INCHARGE',      title:'PUR. INCHARGE'},
-                    {data:'UN_CLASS',          title:'UN CLASS'},
+                    {data:'UN_CLASS',          title:'CLASS'},
                     {data:'REV',               title:'Rev.'},
                     
                 ];
@@ -1037,7 +1037,7 @@ $(document).on('click', '#exportPDF',async function(){
                 { header: 'CHEMICAL NAME/TRADE NAME', dataKey: 'CHEMICAL_NAME' },
                 { header: 'MANUFACTURER / VENDOR',    dataKey: 'VENDOR' },
                 { header: 'PUR. INCHARGE',            dataKey: 'PUR_INCHARGE' },
-                { header: 'UN CLASS',                 dataKey: 'UN_CLASS' },
+                { header: 'CLASS',                 dataKey: 'UN_CLASS' },
                 { header: 'REV',                      dataKey: 'REV' },
             ];
             const colSec = res.sec.map((s) =>{
